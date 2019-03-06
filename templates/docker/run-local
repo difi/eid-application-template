@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+version=DEV-SNAPSHOT
+registry=local
+localConfig=$1
+stackName=placeholder-artifact-name
+
+
+rm -rf docker/placeholder-app-name/puppet_hiera/*  docker/placeholder-app-name/puppet_modules/* docker/placeholder-app-name/placeholder-packaging/*|| exit 1
+mvn package -DskipTests || exit 1
+docker/build-images ${registry} ${version} ${localConfig}|| exit 1
+echo "LOG_ENV=$(whoami)" > docker/log_config
+VERSION=${version} REGISTRY=${registry} docker stack deploy -c docker/stack.yml --resolve-image=never ${stackName} || exit 1
+rm docker/log_config
+
+#delete this comment

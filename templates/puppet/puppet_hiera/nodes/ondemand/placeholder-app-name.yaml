@@ -1,0 +1,18 @@
+---
+classes:
+- placeholder_puppet_module
+- filebeat
+
+placeholder_puppet_module::server_port: 8080
+
+platform::logstash_enabled:    false
+filebeat::prospectors:
+  tomcat-access:
+    paths:
+    - '/var/log/placeholder-app-name/access_log.log'
+    doc_type: 'tomcat-access'
+    fields_under_root: true
+    fields:
+      application: placeholder-app-name
+      environment: ondemand
+      log_env : "${LOG_ENV:unset}"
