@@ -78,7 +78,7 @@ if [ ! -z $repo_dir ]; then
   app_dir="$repo_dir/"
   baseDir=$app_name
 else
-  app_dir="$app_name/"
+  app_dir="$app_name"
 fi
 
 mkdir -p $app_dir && log "Created dir $app_dir as application directory \n" || exit $?
@@ -109,7 +109,7 @@ if [ "$docker_set" = true ]; then
   echo "Copying docker folder to $app_dir"
   cp -r  eid-application-template/templates/docker $app_dir/
   mv $app_dir/docker/placeholder-app-name/ $app_dir/docker/$app_name/
-  mv $app_dir/docker/$app_name/placeholder-packaging $app_dir/docker/$app_name/$packaging
+  mkdir $app_dir/docker/$app_name/$packaging
 
 fi
 
