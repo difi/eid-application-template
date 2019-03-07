@@ -8,7 +8,7 @@ usage="$(basename "$0")
     -n application name
     -p add puppet config 
     -d add docker config
-    -t packaging type jar / war
+    -t packaging type (jar or war)
     -r place application in existing repo folder
 
     Examples:
@@ -17,7 +17,7 @@ usage="$(basename "$0")
 
     ./eid-application-template/setup-project.sh -pd -t jar -a serviceprovider-admin -g no.difi -n serviceprovider-admin  
 
-    -- Create war app with in existing folder:
+    -- Create war app in existing folder:
      
     ./eid-application-template/setup-project.sh -t war -a serviceprovider-admin -g no.difi -n serviceprovider-admin -r eid-serviceprovider-admin 
 
@@ -54,9 +54,14 @@ while getopts "r:a:g:n:t:pdmh" opt; do
     r ) 
       repo_dir=$OPTARG
       ;;
-    \? ) echo "Usage: cmd [-a <artifactId>] [-g <groupId>] [-n <name>]"
-         exit 1
-      ;;
+    :) printf "missing argument for -%s\n" "$OPTARG" >&2
+	              echo "$usage" >&2
+	             exit 1
+              ;;
+   \?) printf "illegal option: -%s\n" "$OPTARG" >&2
+       echo "$usage" >&2
+       exit 1
+       ;;       
   esac
 done
 shift $((OPTIND -1))
@@ -91,7 +96,7 @@ if [ "$puppet_set" = true ]; then
  echo "Copying puppet_modules and puppet_hiera to $app_dir"	
  puppet_module_name=${app_name//-/_}
 
- cp -r  dev-utils/templates/puppet/* $app_dir/
+ cp -r  eid-application-template/templates/puppet/* $app_dir/
 
  mv $app_dir/puppet_modules/placeholder_puppet_module/ $app_dir/puppet_modules/$puppet_module_name/
  mv $app_dir/puppet_hiera/nodes/ondemand/placeholder-app-name.yaml $app_dir/puppet_hiera/nodes/ondemand/$app_name.yaml
@@ -102,7 +107,7 @@ fi
 if [ "$docker_set" = true ]; then
 
   echo "Copying docker folder to $app_dir"
-  cp -r  dev-utils/templates/docker $app_dir/
+  cp -r  eid-application-template/templates/docker $app_dir/
   mv $app_dir/docker/placeholder-app-name/ $app_dir/docker/$app_name/
   mv $app_dir/docker/$app_name/placeholder-packaging $app_dir/docker/$app_name/$packaging
 
@@ -126,5 +131,5 @@ artifactId=${artifactId//-/}
 sed -i '1 i\package '"$groupId"'.'"$artifactId"'.actuator;' $dir_path/actuator/VersionEndpoint.java $dir_path/actuator/InfoEndpointExtension.java
 
 cd ${app_dir}${baseDir}
-mvn clean install
+mvn spring-boot:run
 
