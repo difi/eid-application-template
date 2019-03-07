@@ -1,5 +1,25 @@
 #!/usr/bin/env bash
 
+usage="
+
+    -h show this help text
+    -a artifact ID
+    -n application name
+    -t packaging type (jar or war)
+    -r location of maven module / parent repo
+
+    Examples:
+
+    -- Add docker config with packaging type jar:
+
+    ./eid-application-template/add-docker-config -t jar -a serviceprovider-admin -g no.difi -n serviceprovider-admin
+
+    -- Add docker config to a module in an existing repo:
+
+    ./eid-application-template/add-docker-config -t war -a serviceprovider-admin -g no.difi -n serviceprovider-admin -r eid-serviceprovider-admin
+"
+
+
 while getopts "a:n:r:t:" opt; do
   case ${opt} in
     a )

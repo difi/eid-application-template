@@ -17,7 +17,7 @@ usage="$(basename "$0")
 
     ./eid-application-template/setup-project.sh -pd -t jar -a serviceprovider-admin -g no.difi -n serviceprovider-admin  
 
-    -- Create war app in existing folder:
+    -- Create war app in existing repo / parent folder:
      
     ./eid-application-template/setup-project.sh -t war -a serviceprovider-admin -g no.difi -n serviceprovider-admin -r eid-serviceprovider-admin 
 

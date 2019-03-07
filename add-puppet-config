@@ -1,5 +1,26 @@
 #!/usr/bin/env bash
 
+usage="
+
+    -h show this help text
+    -a artifact ID
+    -g group ID
+    -n application name
+    -t packaging type (jar or war)
+    -r location of maven module / parent repo
+
+    Examples:
+
+    -- Add puppet config with packaging type jar:
+
+    ./eid-application-template/add-puppet-config -t jar -a serviceprovider-admin -g no.difi -n serviceprovider-admin
+
+    -- Add puppet config to a maven module in an existing repo:
+
+    ./eid-application-template/add-puppet-config -t war -a serviceprovider-admin -g no.difi -n serviceprovider-admin -r eid-serviceprovider-admin
+
+"
+
 while getopts "a:g:n:r:t:" opt; do
   case ${opt} in
     a )
