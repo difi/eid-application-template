@@ -20,19 +20,10 @@ usage="
 "
 
 
-while getopts "a:n:r:t:" opt; do
+while getopts "l:" opt; do
   case ${opt} in
-    a )
-      artifactId=$OPTARG
-      ;;
-    n )
-      app_name=$OPTARG
-      ;;
-    r )
-      repo_dir=$OPTARG
-      ;;
-    t )
-      packaging=$OPTARG
+     l )
+      location=$OPTARG
       ;;
     \? ) echo "Usage: cmd [-a <artifactId>] [-g <groupId>] [-n <name>]"
          exit 1
@@ -41,15 +32,23 @@ while getopts "a:n:r:t:" opt; do
 done
 shift $((OPTIND -1))
 
-if [ ! -z $repo_dir ]; then
-  app_dir="$repo_dir"
-else
-  app_dir="$app_name"
+if [ ! -d "$location/docker" ]; then
+  echo "Couldn't find required docker folder in dir $location, aborting"
+  exit 1
 fi
 
-cp -r eid-application-template/templates/docker/placeholder-app-name/* $app_dir/docker/$app_name
-mkdir -p $app_dir/docker/$app_name/$packaging
+if [ ! -f app_info ]; then
+  cp templates/app_info .
+fi
+
+. app_info
+
+app_dir=$location
+
+mkdir ${app_dir}docker/$app_name
+cp -r templates/docker/placeholder-app-name/* ${app_dir}docker/$app_name
+mkdir -p ${app_dir}docker/$app_name/$packaging
 
 
-find $app_dir/docker/$app_name -type f -exec sed -i -e "s/placeholder-app-name/$app_name/g" {} \; -exec sed -i -e "s/placeholder_puppet_module/$puppet_module_name/g" {} \; -exec sed -i -e "s/placeholder-artifact-name/$artifactId/g" {} \; -exec sed -i -e "s/placeholder-group-id/$groupId/g" {} \; -exec sed -i -e "s/placeholder-packaging/$packaging/g" {} \;
+find ${app_dir}docker/$app_name -type f -exec sed -i -e "s/placeholder-app-name/$app_name/g" {} \; -exec sed -i -e "s/placeholder_puppet_module/$puppet_module_name/g" {} \; -exec sed -i -e "s/placeholder-artifact-name/$artifact_id/g" {} \; -exec sed -i -e "s/placeholder-group-id/$group_id/g" {} \; -exec sed -i -e "s/placeholder-packaging/$packaging/g" {} \;
 
