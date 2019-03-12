@@ -3,21 +3,13 @@
 usage="
 
     -h show this help text
-    -a artifact ID
-    -g group ID
-    -n application name
-    -t packaging type (jar or war)
-    -r location of maven module / parent repo
+    -l location of <dir> with existing puppet_hiera and puppet_modules folders
 
     Examples:
 
-    -- Add puppet config with packaging type jar:
+    ./add-puppet-config -l ../eid-serviceprovider-admin/ 
 
-    ./eid-application-template/add-puppet-config -t jar -a serviceprovider-admin -g no.difi -n serviceprovider-admin
 
-    -- Add puppet config to a maven module in an existing repo:
-
-    ./eid-application-template/add-puppet-config -t war -a serviceprovider-admin -g no.difi -n serviceprovider-admin -r eid-serviceprovider-admin
 
 "
 while getopts "l:" opt; do
@@ -39,6 +31,8 @@ fi
 
 if [ ! -f app_info ]; then
   cp templates/app_info .
+  echo "Enter info into file app_info and re run the script"
+  exit
 fi
 
 . app_info
@@ -49,7 +43,7 @@ puppet_module_name=${app_name//-/_}
 
 mkdir $app_dir/puppet_modules/$puppet_module_name
 cp -r templates/puppet/puppet_modules/placeholder_puppet_module/* $app_dir/puppet_modules/$puppet_module_name
-cp templates/puppet/puppet_modules/placeholder_puppet_module/templates/placeholder-artifact-name.conf.erb $app_dir/puppet_modules/$puppet_module_name/templates/$artifactId.conf.erb
+cp templates/puppet/puppet_modules/placeholder_puppet_module/templates/placeholder-artifact-name.conf.erb $app_dir/puppet_modules/$puppet_module_name/templates/$artifact_id.conf.erb
 cp templates/puppet/puppet_hiera/nodes/ondemand/placeholder-app-name.yaml $app_dir/puppet_hiera/nodes/ondemand/$app_name.yaml
 
 find $app_dir/puppet_modules/$puppet_module_name $app_dir/puppet_hiera/nodes/ondemand/ -type f -exec sed -i -e "s/placeholder-app-name/$app_name/g" {} \; -exec sed -i -e "s/placeholder_puppet_module/$puppet_module_name/g" {} \; -exec sed -i -e "s/placeholder-artifact-name/$artifact_id/g" {} \; -exec sed -i -e "s/placeholder-group-id/$group_id/g" {} \; -exec sed -i -e "s/placeholder-packaging/$packaging/g" {} \;

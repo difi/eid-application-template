@@ -3,20 +3,14 @@
 usage="
 
     -h show this help text
-    -a artifact ID
-    -n application name
-    -t packaging type (jar or war)
-    -r location of maven module / parent repo
+    -l location of <dir> with existing docker folder
 
     Examples:
 
     -- Add docker config with packaging type jar:
 
-    ./eid-application-template/add-docker-config -t jar -a serviceprovider-admin -g no.difi -n serviceprovider-admin
+    ./add-docker-config -l ../eid-serviceprovider-admin/
 
-    -- Add docker config to a module in an existing repo:
-
-    ./eid-application-template/add-docker-config -t war -a serviceprovider-admin -g no.difi -n serviceprovider-admin -r eid-serviceprovider-admin
 "
 
 
@@ -39,6 +33,8 @@ fi
 
 if [ ! -f app_info ]; then
   cp templates/app_info .
+  echo "Enter info into file app_info and re run the script"
+  exit
 fi
 
 . app_info

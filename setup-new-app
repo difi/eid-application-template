@@ -3,27 +3,19 @@
 usage="$(basename "$0")
 
     -h show this help text
-    -a artifact ID
-    -g group ID
-    -n application name
     -p add puppet config 
     -d add docker config
-    -t packaging type (jar or war)
-    -r place application in existing repo folder
+    -l place the app in <dir>
 
     Examples:
 
-    -- Create jar app with puppet and docker:
+    -- Create new app:
 
-    ./eid-application-template/setup-project.sh -pd -t jar -a serviceprovider-admin -g no.difi -n serviceprovider-admin  
+    ./setup-new-app -l ../eid-serviceprovider-admin/
 
-    -- Create war app in existing repo / parent folder:
+    -- Create new app with puppet and docker cfg:
      
-    ./eid-application-template/setup-project.sh -t war -a serviceprovider-admin -g no.difi -n serviceprovider-admin -r eid-serviceprovider-admin 
-
-    -- Create jar app:
-
-    ./eid-application-template/setup-project.sh -t jar -a serviceprovider-admin -g no.difi -n serviceprovider-admin 
+    ./setup-new-app -p -d -l ../eid-serviceprovider-admin
 
 "
 
@@ -54,25 +46,19 @@ while getopts "l:pdh" opt; do
 done
 shift $((OPTIND -1))
 
-GREEN='\033[0;32m'
-NC='\033[0m'
-
-
-log() {
-printf "${GREEN} OK ${NC} $1"
-}
-
 if [ ! -f app_info ]; then
   cp templates/app_info .
+  echo "Enter info into file app_info and re run the script"
+  exit
 fi
 
 . app_info
 
 app_dir="${location}${app_name}"
 
-mkdir -p $app_dir/ && log "Created dir $app_dir as application directory \n" || exit $?
+mkdir -p $app_dir/ && echo "Created dir $app_dir as application directory" || exit $?
 
-curl -s https://start.spring.io/starter.tgz -d groupId=$group_id -d artifactId=$artifact_id -d packaging=$packaging -d version=DEV-SNAPSHOT -d dependencies=actuator,web -d language=java -d baseDir=$baseDir -d type=maven-project -d name=$app_name | tar -xzf - -C $app_dir && log "Extracted project: $app_dir\n" || exit $?
+curl -s https://start.spring.io/starter.tgz -d groupId=$group_id -d artifactId=$artifact_id -d packaging=$packaging -d version=DEV-SNAPSHOT -d dependencies=actuator,web -d language=java -d baseDir=$baseDir -d type=maven-project -d name=$app_name | tar -xzf - -C $app_dir && echo "Extracted project: $app_dir" || exit $?
 
 baseDir="$baseDir/"
 
@@ -89,7 +75,7 @@ if [ "$puppet_set" = true ]; then
 
  mv $app_dir/puppet_modules/placeholder_puppet_module/ $app_dir/puppet_modules/$puppet_module_name/
  mv $app_dir/puppet_hiera/nodes/ondemand/placeholder-app-name.yaml $app_dir/puppet_hiera/nodes/ondemand/$app_name.yaml
- mv $app_dir/puppet_modules/$puppet_module_name/templates/placeholder-artifact-name.conf.erb $app_dir/puppet_modules/$puppet_module_name/templates/$artifactId.conf.erb
+ mv $app_dir/puppet_modules/$puppet_module_name/templates/placeholder-artifact-name.conf.erb $app_dir/puppet_modules/$puppet_module_name/templates/$artifact_id.conf.erb
 
 fi
 

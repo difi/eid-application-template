@@ -15,7 +15,11 @@ build() {
     [[ "$3" == "localConfig" ]] || local pull="--pull"
     cp -r puppet_modules docker/placeholder-app-name/ || return 1
     cp -r puppet_hiera docker/placeholder-app-name/ || return 1
-    cp placeholder-artifact-name/target/placeholder-artifact-name.placeholder-packaging docker/placeholder-app-name/placeholder-packaging/placeholder-artifact-name.placeholder-packaging || return 1
+    if [ -d target ]; then
+      cp target/placeholder-artifact-name.placeholder-packaging docker/placeholder-app-name/placeholder-packaging/placeholder-artifact-name.placeholder-packaging || return 1
+    else
+      cp placeholder-artifact-name/target/placeholder-artifact-name.placeholder-packaging docker/placeholder-app-name/placeholder-packaging/placeholder-artifact-name.placeholder-packaging || return 1
+    fi
     buildImage ${registry} placeholder-app-name ${version} "${pull}" || return 1
     }
 
