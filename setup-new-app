@@ -1,0 +1,110 @@
+#!/usr/bin/env bash
+
+usage="$(basename "$0")
+
+    -h show this help text
+    -p add puppet config 
+    -d add docker config
+    -l place the app in <dir>
+
+    Examples:
+
+    -- Create new app:
+
+    ./setup-new-app -l ../eid-serviceprovider-admin/
+
+    -- Create new app with puppet and docker cfg:
+     
+    ./setup-new-app -p -d -l ../eid-serviceprovider-admin
+
+"
+
+while getopts "l:pdh" opt; do
+  case ${opt} in
+    h )
+      echo "$usage"
+      exit
+      ;;
+    p )
+      puppet_set=true
+      ;;
+    d )
+      docker_set=true
+      ;;
+    l )
+      location=$OPTARG
+      ;;
+    :) printf "missing argument for -%s\n" "$OPTARG" >&2
+	              echo "$usage" >&2
+	             exit 1
+              ;;
+   \?) printf "illegal option: -%s\n" "$OPTARG" >&2
+       echo "$usage" >&2
+       exit 1
+       ;;       
+  esac
+done
+shift $((OPTIND -1))
+
+if [ ! -f app_info ]; then
+  cp templates/app_info .
+  echo "Enter app info in file app_info and re run the script"
+  exit
+fi
+
+. app_info
+
+app_dir="${location}${app_name}"
+
+mkdir -p $app_dir/ && echo "Created dir $app_dir as application directory" || exit $?
+
+curl -s https://start.spring.io/starter.tgz -d groupId=$group_id -d artifactId=$artifact_id -d packaging=$packaging -d version=DEV-SNAPSHOT -d dependencies=actuator,web -d language=java -d baseDir=$baseDir -d type=maven-project -d name=$app_name | tar -xzf - -C $app_dir && echo "Extracted project: $app_dir" || exit $?
+
+baseDir="$baseDir/"
+
+dir_path=`find ${app_dir}${baseDir} -name *Application.java -printf '%h\n'`
+
+sed -i '/<build>/a \\t\t<finalName>${project.artifactId}</finalName>' ${app_dir}${baseDir}/pom.xml
+
+if [ "$puppet_set" = true ]; then
+ 
+ echo "Copying puppet_modules and puppet_hiera to $app_dir"	
+ puppet_module_name=${app_name//-/_}
+
+ cp -r templates/puppet/* $app_dir/
+
+ mv $app_dir/puppet_modules/placeholder_puppet_module/ $app_dir/puppet_modules/$puppet_module_name/
+ mv $app_dir/puppet_hiera/nodes/ondemand/placeholder-app-name.yaml $app_dir/puppet_hiera/nodes/ondemand/$app_name.yaml
+ mv $app_dir/puppet_modules/$puppet_module_name/templates/placeholder-artifact-name.conf.erb $app_dir/puppet_modules/$puppet_module_name/templates/$artifact_id.conf.erb
+
+fi
+
+if [ "$docker_set" = true ]; then
+
+  echo "Copying docker folder to $app_dir"
+  cp -r  templates/docker $app_dir/
+  mv $app_dir/docker/placeholder-app-name/ $app_dir/docker/$app_name/
+  mkdir $app_dir/docker/$app_name/$packaging
+
+fi
+
+echo "Creating folders actuator, health, log, service, config, domain in $dir_path"
+mkdir -p $dir_path/{actuator,health,log,service,config,domain}
+
+rm ${app_dir}${baseDir}src/main/resources/application.properties
+
+cp templates/java/application.yml.template ${app_dir}${baseDir}src/main/resources/application.yml
+
+echo "Replacing all placeholder names with '$app_name'"
+
+find ${app_dir}/ -type f -exec sed -i -e "s/placeholder-app-name/$app_name/g" {} \; -exec sed -i -e "s/placeholder_puppet_module/$puppet_module_name/g" {} \; -exec sed -i -e "s/placeholder-artifact-name/$artifact_id/g" {} \; -exec sed -i -e "s/placeholder-group-id/$group_id/g" {} \; -exec sed -i -e "s/placeholder-packaging/$packaging/g" {} \;
+
+cp templates/java/actuator/*  $dir_path/actuator/
+
+artifact_id=${artifact_id//-/}
+
+sed -i '1 i\package '"$group_id"'.'"$artifact_id"'.actuator;' $dir_path/actuator/VersionEndpoint.java $dir_path/actuator/InfoEndpointExtension.java
+
+cd ${app_dir}${baseDir}
+mvn spring-boot:run
+

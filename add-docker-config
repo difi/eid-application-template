@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+
+usage="
+
+    -h show this help text
+    -l location of <dir> with existing docker folder
+
+    Examples:
+
+    -- Add docker config with packaging type jar:
+
+    ./add-docker-config -l ../eid-serviceprovider-admin/
+
+"
+
+
+while getopts "l:" opt; do
+  case ${opt} in
+     l )
+      location=$OPTARG
+      ;;
+    \? ) echo "Usage: cmd [-a <artifactId>] [-g <groupId>] [-n <name>]"
+         exit 1
+      ;;
+  esac
+done
+shift $((OPTIND -1))
+
+if [ ! -d "$location/docker" ]; then
+  echo "Couldn't find required docker folder in dir $location, aborting"
+  exit 1
+fi
+
+if [ ! -f app_info ]; then
+  cp templates/app_info .
+  echo "Enter info into file app_info and re run the script"
+  exit
+fi
+
+. app_info
+
+app_dir=$location
+
+mkdir ${app_dir}docker/$app_name
+cp -r templates/docker/placeholder-app-name/* ${app_dir}docker/$app_name
+mkdir -p ${app_dir}docker/$app_name/$packaging
+
+
+find ${app_dir}docker/$app_name -type f -exec sed -i -e "s/placeholder-app-name/$app_name/g" {} \; -exec sed -i -e "s/placeholder_puppet_module/$puppet_module_name/g" {} \; -exec sed -i -e "s/placeholder-artifact-name/$artifact_id/g" {} \; -exec sed -i -e "s/placeholder-group-id/$group_id/g" {} \; -exec sed -i -e "s/placeholder-packaging/$packaging/g" {} \;
+

@@ -1,0 +1,10 @@
+# Example:
+# app_name=serviceprovider-admin
+# artifact_id=serviceprovider-web-admin
+# group_id=no.difi.
+# packaging=jar  (jar or war)
+
+app_name=
+artifact_id=
+group_id=
+packaging=

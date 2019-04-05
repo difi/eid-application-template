@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+
+usage="
+
+    -h show this help text
+    -l location of <dir> with existing puppet_hiera and puppet_modules folders
+
+    Examples:
+
+    ./add-puppet-config -l ../eid-serviceprovider-admin/ 
+
+
+
+"
+while getopts "l:" opt; do
+  case ${opt} in
+     l )
+      location=$OPTARG
+      ;;
+    \? ) echo "Usage: cmd [-a <artifactId>] [-g <groupId>] [-n <name>]"
+         exit 1
+      ;;
+  esac
+done
+shift $((OPTIND -1))
+
+if [ ! -d "$location/puppet_hiera" ] || [ ! -d "$location/puppet_modules"  ]; then
+  echo "Couldn't find required puppet folders in dir $location, aborting"
+  exit 1
+fi
+
+if [ ! -f app_info ]; then
+  cp templates/app_info .
+  echo "Enter info into file app_info and re run the script"
+  exit
+fi
+
+. app_info
+
+app_dir=$location
+
+puppet_module_name=${app_name//-/_}
+
+mkdir $app_dir/puppet_modules/$puppet_module_name
+cp -r templates/puppet/puppet_modules/placeholder_puppet_module/* $app_dir/puppet_modules/$puppet_module_name
+cp templates/puppet/puppet_modules/placeholder_puppet_module/templates/placeholder-artifact-name.conf.erb $app_dir/puppet_modules/$puppet_module_name/templates/$artifact_id.conf.erb
+cp templates/puppet/puppet_hiera/nodes/ondemand/placeholder-app-name.yaml $app_dir/puppet_hiera/nodes/ondemand/$app_name.yaml
+
+find $app_dir/puppet_modules/$puppet_module_name $app_dir/puppet_hiera/nodes/ondemand/ -type f -exec sed -i -e "s/placeholder-app-name/$app_name/g" {} \; -exec sed -i -e "s/placeholder_puppet_module/$puppet_module_name/g" {} \; -exec sed -i -e "s/placeholder-artifact-name/$artifact_id/g" {} \; -exec sed -i -e "s/placeholder-group-id/$group_id/g" {} \; -exec sed -i -e "s/placeholder-packaging/$packaging/g" {} \;
