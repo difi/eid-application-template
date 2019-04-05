@@ -1,0 +1,50 @@
+{{=<% %>=}}
+#install.pp
+class <% puppetModuleName %>::install inherits <% puppetModuleName %> {
+
+  user { $<% puppetModuleName %>::service_name:
+    ensure => present,
+    shell  => '/sbin/nologin',
+    home   => '/',
+  } ->
+  file { "${<% puppetModuleName %>::config_dir}${<% puppetModuleName %>::application}":
+    ensure => 'directory',
+    mode   => '0755',
+    owner  => $<% puppetModuleName %>::service_name,
+    group  => $<% puppetModuleName %>::service_name,
+  } ->
+  file { "${<% puppetModuleName %>::config_dir}${<% puppetModuleName %>::application}/config":
+    ensure => 'directory',
+    owner  => $<% puppetModuleName %>::service_name,
+    group  => $<% puppetModuleName %>::service_name,
+    mode   => '0755',
+  } ->
+  file { "${<% puppetModuleName %>::log_root}${<% puppetModuleName %>::application}":
+    ensure => 'directory',
+    mode   => '0755',
+    owner  =>  $<% puppetModuleName %>::service_name,
+    group  =>  $<% puppetModuleName %>::service_name,
+  } ->
+  file { "${<% puppetModuleName %>::install_dir}${<% puppetModuleName %>::application}":
+    ensure => 'directory',
+    mode   => '0644',
+    owner  =>  $<% puppetModuleName %>::service_name,
+    group  =>  $<% puppetModuleName %>::service_name,
+  }
+
+  difilib::spring_boot_logrotate { $placeholder_puppet_module::application:
+    application => $<% puppetModuleName %>::application,
+  }
+
+  if ($platform::install_cron_jobs) {
+    $log_cleanup_command = "find ${<% puppetModuleName %>::log_root}$<% puppetModuleName %>::application}/ -type f -name \"*.gz\" -mtime +7 -exec rm -f {} \\;"
+
+    cron { "${<% puppetModuleName %>::application}_log_cleanup":
+      command => $log_cleanup_command,
+      user    => 'root',
+      hour    => '03',
+      minute  => '00',
+    }
+  }
+}
+<%={{ }}=%>

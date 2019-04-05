@@ -48,7 +48,7 @@ shift $((OPTIND -1))
 
 if [ ! -f app_info ]; then
   cp templates/app_info .
-  echo "Enter info into file app_info and re run the script"
+  echo "Enter app info in file app_info and re run the script"
   exit
 fi
 

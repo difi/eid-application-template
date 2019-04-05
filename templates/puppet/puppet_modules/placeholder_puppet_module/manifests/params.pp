@@ -1,6 +1,6 @@
 #params.pp
 class placeholder_puppet_module::params {
-
+  $java_home                        = hiera('platform::java_home')
   $log_root                         = '/var/log/'
   $log_level                        = 'WARN'
   $install_dir                      = '/opt/'

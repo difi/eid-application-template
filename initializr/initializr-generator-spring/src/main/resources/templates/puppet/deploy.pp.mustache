@@ -1,0 +1,12 @@
+{{=<% %>=}}
+#deploy.pp
+class <% puppetModuleName %>::deploy inherits <% puppetModuleName %> {
+
+  difilib::spring_boot_deploy { $<% puppetModuleName %>::application:
+    package      => $<% puppetModuleName %>::group_id,
+    artifact     => $<% puppetModuleName %>::artifact_id,
+    service_name => $<% puppetModuleName %>::service_name,
+    install_dir  => "${<% puppetModuleName %>::install_dir}${<% puppetModuleName %>::application}",
+  }
+}
+<%={{ }}=%>

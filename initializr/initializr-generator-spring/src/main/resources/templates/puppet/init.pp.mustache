@@ -1,0 +1,30 @@
+{{=<% %>=}}
+class <% puppetModuleName %> (
+  String $log_root                                 = $<% puppetModuleName %>::params::log_root,
+  String $log_level                                = $<% puppetModuleName %>::params::log_level,
+  String $install_dir                              = $<% puppetModuleName %>::params::install_dir,
+  String $config_dir                               = $<% puppetModuleName %>::params::config_dir,
+  String $group_id                                 = $<% puppetModuleName %>::params::group_id,
+  $artifact_id                              = $<% puppetModuleName %>::params::artifact_id,
+  $service_name                             = $<% puppetModuleName %>::params::service_name,
+  $server_port                              = $<% puppetModuleName %>::params::server_port,
+  $application                              = $<% puppetModuleName %>::params::application,
+  $server_tomcat_max_threads                = $<% puppetModuleName %>::params::server_tomcat_max_threads,
+  $server_tomcat_min_spare_threads          = $<% puppetModuleName %>::params::server_tomcat_min_spare_threads,
+  $health_show_details                      = $<% puppetModuleName %>::params::health_show_details,
+  $auditlog_dir                             = $<% puppetModuleName %>::params::auditlog_dir,
+  $auditlog_file                            = $<% puppetModuleName %>::params::auditlog_file,
+
+)inherits placeholder_puppet_module::params {
+
+  include platform
+
+  anchor { '<% puppetModuleName %>::begin': } ->
+  class { '::<% puppetModuleName %>::install': } ->
+  class { '::<% puppetModuleName %>::deploy': } ->
+  class { '::<% puppetModuleName %>::config': } ~>
+  class { '::<% puppetModuleName %>::service': } ->
+  anchor { '<% puppetModuleName %>::end': }
+
+}
+<%={{ }}=%>

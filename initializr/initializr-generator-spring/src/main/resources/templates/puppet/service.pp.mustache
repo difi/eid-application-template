@@ -1,0 +1,14 @@
+{{=<% %>=}}
+#service.pp
+class <% puppetModuleName %>::service inherits <% puppetModuleName %> {
+
+  include platform
+
+  if ($platform::deploy_spring_boot) {
+    service { $<% puppetModuleName %>::service_name:
+      ensure => running,
+      enable => true,
+    }
+  }
+}
+<%={{ }}=%>

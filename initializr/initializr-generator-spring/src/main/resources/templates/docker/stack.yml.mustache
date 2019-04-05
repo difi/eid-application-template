@@ -1,0 +1,28 @@
+{{=<% %>=}}
+version: '3.3'
+
+services:
+  <% appName %>:
+    image: ${REGISTRY}/<% appName %>:${VERSION}
+    extra_hosts:
+      - "eid-elk-app01.dmz.local:10.243.220.21"
+    configs:
+      - log_config
+    ports:
+      - 8080
+    networks:
+      atest:
+    dns: 8.8.8.8
+    deploy:
+      placement:
+        constraints:
+          - node.labels.atest == true
+
+networks:
+  atest:
+    driver: overlay
+    attachable: true
+configs:
+  log_config:
+    file: ./log_config
+<%={{ }}=%>

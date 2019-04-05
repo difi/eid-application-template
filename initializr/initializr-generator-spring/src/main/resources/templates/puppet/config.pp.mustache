@@ -1,0 +1,32 @@
+{{=<% %>=}}
+#config.pp
+class <% puppetModuleName %>::config inherits <% puppetModuleName %> {
+
+  file { "${<% puppetModuleName %>::install_dir}${<% puppetModuleName %>::application}/${<% puppetModuleName %>::artifact_id}.conf":
+    ensure  => 'file',
+    content => template("${module_name}/${<% puppetModuleName %>::artifact_id}.conf.erb"),
+    owner   => $<% puppetModuleName %>::service_name,
+    group   => $<% puppetModuleName %>::service_name,
+    mode    => '0444',
+  } ->
+  file { "${<% puppetModuleName %>::config_dir}${<% puppetModuleName %>::application}/application.yml":
+    ensure  => 'file',
+    content => template("${module_name}/application.yml.erb"),
+    owner   => $<% puppetModuleName %>::service_name,
+    group   => $<% puppetModuleName %>::service_name,
+    mode    => '0444',
+  } ->
+  file { "/etc/rc.d/init.d/${<% puppetModuleName %>::service_name}":
+    ensure => 'link',
+    target => "${<% puppetModuleName %>::install_dir}${<% puppetModuleName %>::application}/${<% puppetModuleName %>::artifact_id}.<% packaging %>",
+  }
+
+  difilib::logback_config { $<% puppetModuleName %>::application:
+    application       => $<% puppetModuleName %>::application,
+    owner             => $<% puppetModuleName %>::service_name,
+    group             => $<% puppetModuleName %>::service_name,
+    loglevel_no       => $<% puppetModuleName %>::log_level,
+    loglevel_nondifi  => $<% puppetModuleName %>::log_level,
+  }
+}
+<%={{ }}=%>

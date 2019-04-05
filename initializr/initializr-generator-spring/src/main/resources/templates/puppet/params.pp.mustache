@@ -1,0 +1,22 @@
+{{=<% %>=}}
+#params.pp
+class <% puppetModuleName %>::params {
+
+  $log_root                         = '/var/log/'
+  $log_level                        = 'WARN'
+  $install_dir                      = '/opt/'
+  $config_dir                       = '/etc/opt/'
+  $group_id                         = '<% groupId %>'
+  $artifact_id                      = '<% artifactId %>'
+  $service_name                     = '<% appName %>'
+  $server_port                      = ''
+  $application                      = '<% appName %>'
+  $server_tomcat_max_threads        = 200
+  $server_tomcat_min_spare_threads  = 10
+  $health_show_details              = 'always'
+
+  $auditlog_dir                 = '/var/log/<% appName %>/audit/'
+  $auditlog_file                = 'audit.log'
+
+}
+<%={{ }}=%>

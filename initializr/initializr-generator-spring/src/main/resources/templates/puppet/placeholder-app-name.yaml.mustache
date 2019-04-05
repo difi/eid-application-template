@@ -1,0 +1,20 @@
+{{=<% %>=}}
+---
+classes:
+- <% puppetModuleName %>
+- filebeat
+
+<% puppetModuleName %>::server_port: 8080
+
+platform::logstash_enabled:    false
+filebeat::prospectors:
+  tomcat-access:
+    paths:
+    - '/var/log/<% appName %>/access_log.log'
+    doc_type: 'tomcat-access'
+    fields_under_root: true
+    fields:
+      application: <% appName %>
+      environment: ondemand
+      log_env : "${LOG_ENV:unset}"
+<%={{ }}=%>
